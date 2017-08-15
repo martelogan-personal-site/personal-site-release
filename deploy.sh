@@ -125,7 +125,6 @@ main() {
 	cd $deploy_directory
 
 	git add -A
-	echo "here"
 	git commit -m "Publish: $commit_message"
 }
 
