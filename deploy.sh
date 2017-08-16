@@ -21,6 +21,7 @@ Options:
   -h, --help               Show this help information.
   -m, --message MESSAGE    Specify the commit message.
   -n, --no-hash            Don't append the source commit's hash to the message
+  -f, --force              Force confirmation to all prompts (as possible)
   -c, --config-file PATH   Override default & environment variables' values
                            with those in set in the file at 'PATH'. Must be the
                            first option specified.
@@ -44,17 +45,30 @@ parse_args() {
 	while : ; do
 		if [[ $1 = "-h" || $1 = "--help" ]]; then
 			echo "$help_message"
-			return 0
+			exit 0
 		elif [[ ( $1 = "-m" || $1 = "--message" ) && -n $2 ]]; then
 			commit_message=$2
 			shift 2
 		elif [[ $1 = "-n" || $1 = "--no-hash" ]]; then
 			GIT_DEPLOY_APPEND_HASH=false
 			shift
+		elif [[ $1 = "-f" || $1 = "--force" ]]; then
+			FORCE_CONFIRM="y"
+			shift
 		else
 			break
 		fi
 	done
+}
+
+prompt_confirmation() {
+    CONFIRMATION="n"
+    if [ -z $2 ]
+    then
+        read -p "$1" CONFIRMATION
+    else
+        CONFIRMATION=$2
+    fi
 }
 
 main() {
@@ -115,7 +129,7 @@ main() {
 	git commit -m "Build: $commit_message"
 	cd ..
 
-	# publish distribution
+	# publish distribution to local production environment
 	cp $src_directory/javascripts/*.min.js $deploy_directory/javascripts/
 	cp $src_directory/stylesheets/main.min.css $deploy_directory/stylesheets/
 	cp $src_directory/images/* $deploy_directory/images/
@@ -126,6 +140,29 @@ main() {
 
 	git add -A
 	git commit -m "Publish: $commit_message"
+	cd ..
+
+	# release latest distribution per environment
+	prompt_confirmation "Proceed to publish changes to development repo (y/n)? " $FORCE_CONFIRM
+    if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    	cd $src_directory
+        git push --set-upstream origin master
+        cd ..
+    fi
+
+    prompt_confirmation "Proceed to publish changes to production repo (y/n)? " $FORCE_CONFIRM
+    if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    	cd $deploy_directory
+        git push --set-upstream origin master
+        cd ..
+    fi
+
+    prompt_confirmation "Proceed to publish changes to release repo (y/n)? " $FORCE_CONFIRM
+    if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    	git add -A
+    	git commit -m "Release: $commit_message"
+        git push --set-upstream origin master
+    fi
 }
 
 [[ $1 = --source-only ]] || main "$@"
