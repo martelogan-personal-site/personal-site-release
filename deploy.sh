@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-#####################################
-### Script to automate build and ####
-### deployment of personal website. #
-### See Readme for details ##########
-#####################################
+# Script to automate build and deployment of personal website.
+# Copyright (C) 2015 Logan Martel - All Rights Reserved
+# Permission to copy and modify is granted under the GNU Apache License 2.0
+# Last revised 06/29/2018
+# See README.md for further details.
 
-# Source base credit to: 
+# Note, this script has been modified & based loosely on: 
 # https://github.com/X1011/git-directory-deploy/blob/master/deploy.sh
 
 set -o errexit # abort if any command fails
