@@ -1,6 +1,6 @@
 [submodule "personal-site-dev"]
 	path = personal-site-dev
-	url = https://github.com/martelogan/personal-site-dev
+	url = https://github.com/martelogan-personal-site/personal-site-dev
 [submodule "martelogan.github.io"]
 	path = martelogan.github.io
 	url = https://github.com/martelogan/martelogan.github.io
